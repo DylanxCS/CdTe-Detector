@@ -88,13 +88,13 @@ pit = PIT.create_chips(fpga=f, number_of_chips=1)[0]
 #Endpoint.pit=Endpoint.get_chip_endpoints('PIT')
 #pit = PIT.create_chips(fpga=f, number_of_chips=1)[0]
 
-pit.wb_reset()
-pit.reset()
-pit.reset_clear()
-#pit.wb_write('MOD', 100000000)
-pit.wb_write('CNT_EN', 1)
-pit.set_period(.1)
-ctrl_reg = pit.wb_read('CTRL')
+# pit.wb_reset()
+# pit.reset()
+# pit.reset_clear()
+    #pit.wb_write('MOD', 100000000)
+# pit.wb_write('CNT_EN', 1)
+# pit.set_period(.1)
+# ctrl_reg = pit.wb_read('CTRL')
 #print(f'WB control reg {ctrl_reg}')
 
 # power supply turn on via FPGA enables
@@ -187,31 +187,6 @@ def ads_code_to_voltage(ads_data, ads):
             # ads.ranges is an array for all channels.
 
     return data
-
-def capture_data(idx=0, filename=None):
-    ddr.repeat_setup() # Get data
-    time.sleep(2)
-    if filename is None:
-        filename = file_name.format(idx) + '.h5'
-
-    # saves data to a file; returns to the workspace the deswizzled DDR data of the last repeat
-    chan_data_one_repeat = ddr.save_data(data_dir, filename, num_repeats=60,
-                                        blk_multiples=200)  # blk multiples must be multiple of 10 
-    # each block multiple is 256 bytes 
-
-    # to get the deswizzled data of all repeats need to read the file
-    _, chan_data = read_h5(data_dir, file_name=filename, chan_list=np.arange(8))
-    
-    # Long data sequence -- entire file
-    adc_data, timestamp, dac_data, ads_data_tmp, ads_seq_cnt, read_errors = ddr.data_to_names(chan_data)
-    ads_data = extract_ads_data(ads_data_tmp, ads_seq_cnt, ads.sequencer_setup)
-    log_info = {'timestamp_step': timestamp[1]-timestamp[0],
-                'timestamp_span': 5e-9*(timestamp[-1] - timestamp[0]),
-                'read_errors': read_errors}
-    
-    data = ads_code_to_voltage(ads_data, ads)
-
-    return data, ads_data, log_info, ads_seq_cnt, dac_data, chan_data
 
 def generate_time(data, ads, ADS_FS):
     sample_rate = ADS_FS/len(ads.sequencer_setup)
