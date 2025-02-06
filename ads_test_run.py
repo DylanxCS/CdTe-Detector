@@ -1,5 +1,6 @@
 #from ads_test_setup import *
 from mpl_toolkits.mplot3d import Axes3D
+import copy
 
 num_repeats = 200
 
@@ -26,7 +27,9 @@ def capture_data(idx=0, filename=None):
     
     data = ads_code_to_voltage(ads_data, ads)
 
-    return data, ads_data, log_info, ads_seq_cnt, dac_data, chan_data
+    return voltage_data, ads_data, log_info, ads_seq_cnt, dac_data, chan_data
+
+data = copy.deepcopy(voltage_data)
 
 pit_charge_duration = 0.1
 pit_discharge_duration = 500e-6
@@ -62,7 +65,7 @@ ddr.repeat_setup() # Get data
 ads.write_reg_bridge()
 
 data, ads_data, log_info, sqn, dac_data, chan_data  = capture_data(idx=0) #dac_data
-data, ads_data, log_info, sqn, dac_data, chan_data  = capture_data(idx=0) #dac_data
+#data, ads_data, log_info, sqn, dac_data, chan_data  = capture_data(idx=0) #dac_data
 
 
 sample_rate = ADS_FS/len(ads.sequencer_setup)
@@ -143,27 +146,14 @@ for k in data:
 #-----combine?--------
 
 
-    
- 
-#Calculate current for each channel for each integration interval.
-
 
 #1.) dac_data is sampled 20 more frequently than ads_data, therefore we must divide the interval_start by 20 to have the equivalent index of ads_data
 #    Multiply by the period of ads sample rate to print the time of rising edge in seconds.
-
-# sum1=0 # Will be recording the voltage level for each channel right before the integration period ends
-# count1=0
-# for k in data:
-    # for i in data[k]: #2.)
-        # sum1+=data[k][i] #3.)
-        # count1+=1
-        #print(ads_data[k][i]) #3.)
-# print(f'average is :{sum1/count1}')
-
 #2.) Index i: A-B, k: 0-7, then the equivalent index of integration period end in the ads data
 #    each channel 0-7 has thousands of entries. For example when numrepeats=20, len(ads_data['A'][0] = roughly 12800
 #3.) I subtract by 50 to ensure valid data readings on all channels
-            
+        
+        
 # Order the dictionary to it's physical pixel location
 data_new = np.empty((4,4))
 # best to do ave_end_voltages across all intervals so we know max brightness will be 3.7
@@ -187,35 +177,30 @@ data_new[3][1] = ave_currents['B'][7]
 data_new[3][2] = ave_currents['A'][0]
 data_new[3][3] = ave_currents['A'][2]
 
+
+
+
 plt.figure(1)
 plt.imshow(data_new, cmap='gray', vmin=0, vmax=1.2) 
 plt.show(block=False)
   
-#print(f'chan{k}{i}
-#t={}
+  
+  
+  
+  
+  
+  
+  
+  
+'''
+#plot voltages across time
 ls={'A':'-','B':'--'}
-# plt.figure(2)
-#ti = generate_time(dac_data[2], ads, 1.25e6)
-# for k in ['A', 'B']:
-    # for i in range(8):
-        #t[k][i] = generate_time(data[k][i], ads, ADS_FS)
-        # plt.plot(t[k][i], data[k][i], label=f'{k}{i}', linestyle=ls[k])
-# for i in range(len(interval_start_indexes)):
-    # plt.axvline(x=t['A'][0][interval_start_indexes[i]], color='b')
-    # plt.axvline(x=t['A'][0][interval_end_indexes[i]], color='g')
-#plt.legend()
+plt.figure(2)
+for k in ['A', 'B']:
+    for i in range(8):
+        t[k][i] = generate_time(data[k][i], ads, ADS_FS)
+        plt.plot(t[k][i], data[k][i], label=f'{k}{i}', linestyle=ls[k])
 
-colors = [
-    "#FF0000",  # Red
-    "#FF7F00",  # Orange
-    "#FFFF00",  # Yellow
-    "#00FF00",  # Green
-    "#0000FF",  # Blue
-    "#4B0082",  # Indigo
-    "#9400D3",  # Violet
-    "#FF00FF"   # Magenta (extra color for balance)
-]
-markers={'A':'o','B':'s'}
 #plot channel current across each interval
 plt.figure(3)
 for k in ['A', 'B']:
@@ -225,10 +210,5 @@ for k in ['A', 'B']:
 plt.show(block=False)
 
 
-#plt.plot(t, data['A'][1], 'r')
-plt.show(block=False)
-
-np.mean(data['A'][0])
-np.std(data['A'][0])
-
-ads.set_host_mode() # stop FPGA driven SPIl
+#ads.set_host_mode() # stop FPGA driven SPIl
+'''
